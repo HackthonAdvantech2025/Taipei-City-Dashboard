@@ -72,4 +72,4 @@ Taipei-City-Dashboard-DE/docker/prod/.env
 **/__pycache__/
 *.py[cod]
 
-*.env
+*.env.superpowers/
