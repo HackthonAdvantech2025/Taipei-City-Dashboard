@@ -1,0 +1,37 @@
+{
+    "dag_infos": {
+        "dag_id": "circular_line_stations",
+        "start_date": "2026-04-27",
+        "schedule_interval": "@weekly",
+        "catchup": false,
+        "tags": ["transit_stations", "ntmetro", "環狀線", "TDX"],
+        "description": "Seed New Taipei Metro (Circle Line) station locations from TDX.",
+        "default_args": {
+            "owner": "airflow",
+            "email": ["DEFAULT_EMAIL_LIST"],
+            "email_on_retry": false,
+            "email_on_failure": true,
+            "retries": 1,
+            "retry_delay": 60
+        },
+        "ready_data_db": "postgres_default",
+        "ready_data_default_table": "transit_stations",
+        "ready_data_history_table": "",
+        "raw_data_db": "postgres_default",
+        "raw_data_table": "",
+        "load_behavior": "replace"
+    },
+    "data_infos": {
+        "name_cn": "新北捷運環狀線站點",
+        "airflow_update_freq": "weekly",
+        "source": "https://tdx.transportdata.tw/api/basic/v2/Rail/Metro/Station/NTMETRO",
+        "source_type": "TDX API",
+        "source_dept": "交通部 TDX",
+        "gis_format": "Point",
+        "output_coordinate": "EPSG:4326",
+        "is_geometry": 0,
+        "dataset_description": "新北捷運環狀線各站點位置與順序",
+        "etl_description": "parse JSON, extract nested fields, standardize columns",
+        "sensitivity": "public"
+    }
+}
