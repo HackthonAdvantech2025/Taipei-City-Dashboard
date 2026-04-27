@@ -1,0 +1,12 @@
+[
+  { "system": "ntmetro", "line_id": "YL", "station_id": "YL01", "station_name_zh": "新北產業園區", "station_name_en": "New Taipei Industrial Park", "lat": 25.0197, "lng": 121.4664, "sequence": 1 },
+  { "system": "ntmetro", "line_id": "YL", "station_id": "YL02", "station_name_zh": "幸福", "station_name_en": "Xinfu", "lat": 25.0261, "lng": 121.4807, "sequence": 2 },
+  { "system": "ntmetro", "line_id": "YL", "station_id": "YL03", "station_name_zh": "頭前庄", "station_name_en": "Touqianzhuang", "lat": 25.0319, "lng": 121.4938, "sequence": 3 },
+  { "system": "ntmetro", "line_id": "YL", "station_id": "YL04", "station_name_zh": "新埔民生", "station_name_en": "Xinpu Minsheng", "lat": 25.0401, "lng": 121.4880, "sequence": 4 },
+  { "system": "ntmetro", "line_id": "YL", "station_id": "YL05", "station_name_zh": "板橋", "station_name_en": "Banqiao", "lat": 25.0143, "lng": 121.4627, "sequence": 5 },
+  { "system": "tymc", "line_id": "AL", "station_id": "A01", "station_name_zh": "台北車站", "station_name_en": "Taipei Main Station", "lat": 25.0479, "lng": 121.5165, "sequence": 1 },
+  { "system": "tymc", "line_id": "AL", "station_id": "A02", "station_name_zh": "三重", "station_name_en": "Sanchong", "lat": 25.0632, "lng": 121.4851, "sequence": 2 },
+  { "system": "tymc", "line_id": "AL", "station_id": "A03", "station_name_zh": "新北產業園區", "station_name_en": "New Taipei Industrial Park", "lat": 25.0198, "lng": 121.4666, "sequence": 3 },
+  { "system": "tymc", "line_id": "AL", "station_id": "A12", "station_name_zh": "機場第一航廈", "station_name_en": "Airport Terminal 1", "lat": 25.0775, "lng": 121.2334, "sequence": 12 },
+  { "system": "tymc", "line_id": "AL", "station_id": "A13", "station_name_zh": "機場第二航廈", "station_name_en": "Airport Terminal 2", "lat": 25.0818, "lng": 121.2302, "sequence": 13 }
+]
