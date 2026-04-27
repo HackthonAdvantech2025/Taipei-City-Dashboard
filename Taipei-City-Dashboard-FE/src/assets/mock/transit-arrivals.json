@@ -1,0 +1,9 @@
+{
+  "data": [
+    { "station_id": "YL01", "station_name_zh": "新北產業園區", "direction": 0, "destination_zh": "迴龍", "estimate_time": 180, "updated_at": "2026-04-27T10:42:00+08:00" },
+    { "station_id": "YL02", "station_name_zh": "幸福", "direction": 0, "destination_zh": "迴龍", "estimate_time": 420, "updated_at": "2026-04-27T10:42:00+08:00" },
+    { "station_id": "YL01", "station_name_zh": "新北產業園區", "direction": 1, "destination_zh": "新埔民生", "estimate_time": 300, "updated_at": "2026-04-27T10:42:00+08:00" },
+    { "station_id": "A01", "station_name_zh": "台北車站", "direction": 0, "destination_zh": "桃園機場", "estimate_time": 720, "updated_at": "2026-04-27T10:42:00+08:00" },
+    { "station_id": "A01", "station_name_zh": "台北車站", "direction": 1, "destination_zh": "台北車站", "estimate_time": 480, "updated_at": "2026-04-27T10:42:00+08:00" }
+  ]
+}

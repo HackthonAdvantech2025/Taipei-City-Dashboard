@@ -18,10 +18,24 @@ import { useAuthStore } from "../store/authStore";
 
 import MoreInfo from "../components/dialogs/MoreInfo.vue";
 import ReportIssue from "../components/dialogs/ReportIssue.vue";
+import { ref } from "vue";
+import TransitMap from "../dashboardComponent/components/TransitMap.vue";
+import ArrivalBoard from "../dashboardComponent/components/ArrivalBoard.vue";
+import { useTransitStore } from "../store/transitStore";
 
 const contentStore = useContentStore();
 const dialogStore = useDialogStore();
 const authStore = useAuthStore();
+const transitStore = useTransitStore();
+const arrivalSystem = ref("ntmetro");
+const arrivalStationId = ref(null);
+
+function onTransitStationClick(stationId, system) {
+	arrivalSystem.value = system;
+	arrivalStationId.value = stationId;
+}
+
+transitStore.fetchStations();
 
 function handleOpenSettings() {
 	contentStore.editDashboard = JSON.parse(
@@ -222,6 +236,27 @@ function handleMoreInfo(item) {
       </p>
     </div>
   </div>
+
+  <!-- Transit Map PoC Section -->
+  <div class="transit-poc-section">
+    <h3 class="transit-poc-title">
+      跨運具整合地圖
+    </h3>
+    <div class="transit-poc-grid">
+      <div class="transit-poc-map-card">
+        <TransitMap
+          :systems="['ntmetro', 'tymc']"
+          @station-click="onTransitStationClick"
+        />
+      </div>
+      <div class="transit-poc-arrival-card">
+        <ArrivalBoard
+          :system="arrivalSystem"
+          :station-id="arrivalStationId"
+        />
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">
@@ -288,5 +323,36 @@ function handleMoreInfo(item) {
 	to {
 		transform: rotate(360deg);
 	}
+}
+
+.transit-poc-section {
+	padding: 24px var(--font-m);
+	background: #0a0e1a;
+	grid-column: 1 / -1;
+}
+.transit-poc-title {
+	color: #94a3b8;
+	font-size: 14px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	margin-bottom: 16px;
+	font-weight: 600;
+}
+.transit-poc-grid {
+	display: grid;
+	grid-template-columns: 2fr 1fr;
+	gap: 16px;
+	min-height: 360px;
+
+	@media (max-width: 720px) {
+		grid-template-columns: 1fr;
+	}
+}
+.transit-poc-map-card,
+.transit-poc-arrival-card {
+	background: #0f172a;
+	border-radius: 8px;
+	overflow: hidden;
+	border: 1px solid #1e293b;
 }
 </style>
