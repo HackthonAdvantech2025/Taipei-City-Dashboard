@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
-
-const tdxTokenURL = "https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token"
 
 type tdxTokenCache struct {
 	mu          sync.Mutex
@@ -18,74 +18,88 @@ type tdxTokenCache struct {
 	expiresAt   time.Time
 }
 
-var tdxCache = &tdxTokenCache{}
+var cache = &tdxTokenCache{}
 
-// getTDXToken returns a valid TDX bearer token, refreshing if expired.
+type tokenResponse struct {
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int    `json:"expires_in"`
+}
+
 func getTDXToken() (string, error) {
-	tdxCache.mu.Lock()
-	defer tdxCache.mu.Unlock()
+	cache.mu.Lock()
+	defer cache.mu.Unlock()
 
-	if time.Now().Before(tdxCache.expiresAt.Add(-60 * time.Second)) {
-		return tdxCache.accessToken, nil
+	// Use a 60s buffer to avoid token expiring mid-request
+	if cache.accessToken != "" && time.Now().Add(60*time.Second).Before(cache.expiresAt) {
+		return cache.accessToken, nil
 	}
 
 	clientID := os.Getenv("TDX_CLIENT_ID")
 	clientSecret := os.Getenv("TDX_CLIENT_SECRET")
 	if clientID == "" || clientSecret == "" {
-		return "", fmt.Errorf("TDX_CLIENT_ID or TDX_CLIENT_SECRET not set")
+		return "", fmt.Errorf("TDX_CLIENT_ID or TDX_CLIENT_SECRET environment variables not set")
 	}
 
-	resp, err := http.PostForm(tdxTokenURL, map[string][]string{
-		"grant_type":    {"client_credentials"},
-		"client_id":     {clientID},
-		"client_secret": {clientSecret},
-	})
+	tokenURL := "https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token"
+	data := url.Values{}
+	data.Set("grant_type", "client_credentials")
+	data.Set("client_id", clientID)
+	data.Set("client_secret", clientSecret)
+
+	req, err := http.NewRequest("POST", tokenURL, strings.NewReader(data.Encode()))
 	if err != nil {
-		return "", fmt.Errorf("TDX token request failed: %w", err)
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
 	}
 	defer resp.Body.Close()
 
-	var result struct {
-		AccessToken string `json:"access_token"`
-		ExpiresIn   int    `json:"expires_in"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return "", fmt.Errorf("TDX token decode failed: %w", err)
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("token request failed with status %d: %s", resp.StatusCode, string(body))
 	}
 
-	tdxCache.accessToken = result.AccessToken
-	tdxCache.expiresAt = time.Now().Add(time.Duration(result.ExpiresIn) * time.Second)
-	return tdxCache.accessToken, nil
+	var tokenRes tokenResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tokenRes); err != nil {
+		return "", err
+	}
+
+	cache.accessToken = tokenRes.AccessToken
+	cache.expiresAt = time.Now().Add(time.Duration(tokenRes.ExpiresIn) * time.Second)
+
+	return cache.accessToken, nil
 }
 
-// FetchTDXLiveBoard calls the TDX LiveBoard API for the given operator
-// and returns the raw JSON bytes.
-// operator is one of: "NTMETRO", "TYMC"
+// FetchTDXLiveBoard fetches the LiveBoard data for the given operator.
+// operator should be "NTMETRO" or "TYMC".
 func FetchTDXLiveBoard(operator string) ([]byte, error) {
 	token, err := getTDXToken()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get TDX token: %w", err)
 	}
 
-	url := fmt.Sprintf(
-		"https://tdx.transportdata.tw/api/basic/v2/Rail/Metro/LiveBoard/%s?$format=JSON",
-		operator,
-	)
-	req, err := http.NewRequest("GET", url, nil)
+	apiURL := fmt.Sprintf("https://tdx.transportdata.tw/api/basic/v2/Rail/Metro/LiveBoard/%s?$format=JSON", operator)
+	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 15 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("TDX LiveBoard request failed: %w", err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("TDX LiveBoard returned status %d", resp.StatusCode)
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("TDX API request failed with status %d: %s", resp.StatusCode, string(body))
 	}
 
 	return io.ReadAll(resp.Body)
