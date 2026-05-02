@@ -67,6 +67,17 @@ func GetComponentChartData(c *gin.Context) {
 			}
 			districtMap := make(map[string]*districtStats)
 			
+			hasStatus := false
+			if len(features) > 0 {
+				if feat, ok := features[0].(map[string]interface{}); ok {
+					if props, ok := feat["properties"].(map[string]interface{}); ok {
+						if _, ok := props["status"]; ok {
+							hasStatus = true
+						}
+					}
+				}
+			}
+
 			for _, f := range features {
 				feat, ok := f.(map[string]interface{})
 				if !ok { continue }
@@ -74,11 +85,14 @@ func GetComponentChartData(c *gin.Context) {
 				if !ok { continue }
 				
 				// Extract district
-				address, _ := props["address"].(string)
 				district := "未知區域"
-				runes := []rune(address)
-				if len(runes) >= 6 {
-					district = string(runes[3:6])
+				if addr, ok := props["address"].(string); ok {
+					runes := []rune(addr)
+					if len(runes) >= 6 {
+						district = string(runes[3:6])
+					}
+				} else if dist, ok := props["district"].(string); ok {
+					district = dist
 				}
 				
 				if _, exists := districtMap[district]; !exists {
@@ -86,20 +100,25 @@ func GetComponentChartData(c *gin.Context) {
 				}
 				
 				districtMap[district].Total++
-				status, _ := props["status"].(string)
-				if status == "PASS" {
-					districtMap[district].Pass++
+				if status, ok := props["status"].(string); ok {
+					if status == "PASS" {
+						districtMap[district].Pass++
+					}
 				}
 			}
 
 			chartDataOutput := []models.TwoDimensionalData{}
 			for dist, stats := range districtMap {
-				passRate := (float64(stats.Pass) / float64(stats.Total)) * 100
-				// Round to 1 decimal place
-				roundedPassRate := math.Round(passRate*10) / 10
+				var dataValue float64
+				if hasStatus {
+					passRate := (float64(stats.Pass) / float64(stats.Total)) * 100
+					dataValue = math.Round(passRate*10) / 10
+				} else {
+					dataValue = float64(stats.Total)
+				}
 				chartDataOutput = append(chartDataOutput, models.TwoDimensionalData{
 					Xaxis: dist,
-					Data:  roundedPassRate,
+					Data:  dataValue,
 				})
 			}
 			c.JSON(http.StatusOK, gin.H{"status": "success", "data": []interface{}{gin.H{"data": chartDataOutput}}})
