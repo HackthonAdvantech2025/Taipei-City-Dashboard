@@ -30,6 +30,7 @@ func ConfigureRoutes() {
 	// API routers
 	RouterGroup = Router.Group("/api/" + global.VERSION)
 	RouterGroup.GET("/init-food-safety", controllers.InitFoodSafety)
+	RouterGroup.GET("/init-school-lunch", controllers.InitSchoolLunch)
 
 	Router.Use(middleware.ValidateJWT)
 	configureAuthRoutes()
