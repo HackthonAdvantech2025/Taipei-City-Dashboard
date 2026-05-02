@@ -91,17 +91,17 @@ func InitSchoolLunch(c *gin.Context) {
 
     // 5. Register Queries in query_charts
     
-    // Donut Query
+    // Donut Query - DonutChart uses series[0].data format (two_d)
     donutQuery := `SELECT 
                         cert_type as x_axis,
-                        '佔比' as y_axis,
-                        round(avg(proportion), 1) as data
+                        round(avg(proportion))::int as data
                     FROM school_lunch_traceability
-                    GROUP BY 1, 2`
+                    GROUP BY cert_type
+                    ORDER BY round(avg(proportion))::int DESC`
     
     models.DBManager.Exec("DELETE FROM query_charts WHERE index = 'school_lunch_proportions' AND city = 'taipei'")
     models.DBManager.Exec(`INSERT INTO query_charts (index, city, query_type, query_chart, source, short_desc, created_at, updated_at, time_from, time_to) 
-              VALUES ('school_lunch_proportions', 'taipei', 'three_d', ?, '臺北市政府教育局', '顯示校園午餐使用各類標章食材的佔比。', NOW(), NOW(), 'max', 'now')`, donutQuery)
+              VALUES ('school_lunch_proportions', 'taipei', 'two_d', ?, '臺北市政府教育局', '顯示校園午餐使用各類標章食材的佔比。', NOW(), NOW(), 'max', 'now')`, donutQuery)
 
     // District Query
     distQuery := `SELECT 
