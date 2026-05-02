@@ -136,11 +136,25 @@ func InitFoodSafety(c *gin.Context) {
 
     // 6. Register Queries in query_charts
     
-    // Map Query (GeoJSON)
-    mapQuerySQL := `SELECT jsonb_build_object('type', 'FeatureCollection', 'features', jsonb_agg(features.feature))
-                 FROM (SELECT jsonb_build_object('type', 'Feature', 'id', id, 'geometry', ST_AsGeoJSON(ST_MakePoint(lng, lat))::jsonb,
-                 'properties', jsonb_build_object('name', name, 'address', address, 'status', status, 'category', category, 'test_item', test_item, 'inspection_date', inspection_date)) AS feature
-                 FROM food_safety_inspections) features`
+    // Map Query (GeoJSON) - use CTE to allow safe subquery wrapping by GetGeoJSONData
+    mapQuerySQL := `WITH inspection_features AS (
+                        SELECT jsonb_build_object(
+                            'type', 'Feature',
+                            'id', id,
+                            'geometry', ST_AsGeoJSON(ST_MakePoint(lng, lat))::jsonb,
+                            'properties', jsonb_build_object(
+                                'name', name,
+                                'address', address,
+                                'status', status,
+                                'category', category,
+                                'test_item', test_item,
+                                'inspection_date', inspection_date
+                            )
+                        ) AS feature
+                        FROM food_safety_inspections
+                    )
+                    SELECT jsonb_build_object('type', 'FeatureCollection', 'features', jsonb_agg(feature))::text AS result
+                    FROM inspection_features`
     
     models.DBManager.Exec("DELETE FROM query_charts WHERE index = 'food_safety' AND city = 'taipei'")
     qcSQL := fmt.Sprintf(`INSERT INTO query_charts (index, city, query_type, query_chart, map_config_ids, source, short_desc, created_at, updated_at, time_from, time_to) 

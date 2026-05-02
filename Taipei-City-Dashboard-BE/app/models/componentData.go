@@ -131,6 +131,21 @@ func GetComponentChartDataQuery(id int, city string) (queryType string, queryStr
 	return chartDataQuery.QueryType, chartDataQuery.QueryChart, nil
 }
 
+func GetMapGeoJSONDataQuery(mapID int, city string) (queryType string, queryString string, err error) {
+	var chartDataQuery ChartDataQuery
+
+	err = DBManager.
+		Table("query_charts").
+		Select("query_type, query_chart").
+		Where("map_config_ids @> ARRAY[?]::integer[]", mapID).
+		Where("city = ?", city).
+		Find(&chartDataQuery).Error
+	if err != nil {
+		return queryType, queryString, err
+	}
+	return chartDataQuery.QueryType, chartDataQuery.QueryChart, nil
+}
+
 func GetComponentHistoryDataQuery(id int, city string, timeFrom string, timeTo string) (queryHistory string, err error) {
 	var historyDataQuery HistoryDataQuery
 
@@ -348,20 +363,27 @@ func GetMapLegendData(query *string, timeFrom string, timeTo string) (chartData 
 }
 
 func GetGeoJSONData(query *string) (geoJSON map[string]interface{}, err error) {
+	if query == nil || strings.TrimSpace(*query) == "" {
+		return nil, fmt.Errorf("query is empty")
+	}
 	// Trim trailing semicolon if present
 	trimmedQuery := strings.TrimRight(strings.TrimSpace(*query), ";")
 
-	// Wrap the query to return a single text column named 'result'
-	wrappedQuery := fmt.Sprintf("SELECT (%s)::text AS result", trimmedQuery)
+	// Use a more flexible wrapping that supports WITH clauses and complex SELECTs
+	// We wrap it as a subquery in the FROM clause instead of a scalar subquery
+	wrappedQuery := fmt.Sprintf("SELECT result::text FROM (%s) AS sub(result) LIMIT 1", trimmedQuery)
 
-	var row struct {
-		Result string `gorm:"column:result"`
-	}
-	err = DBDashboard.Raw(wrappedQuery).Scan(&row).Error
+	var result string
+	err = DBDashboard.Raw(wrappedQuery).Scan(&result).Error
 	if err != nil {
-		return nil, err
+		// Fallback for queries that might not have exactly one column named 'result'
+		// or if the subquery wrapping fails for some specific PG versions
+		err = DBDashboard.Raw(trimmedQuery).Scan(&result).Error
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	err = json.Unmarshal([]byte(row.Result), &geoJSON)
+	err = json.Unmarshal([]byte(result), &geoJSON)
 	return geoJSON, err
 }

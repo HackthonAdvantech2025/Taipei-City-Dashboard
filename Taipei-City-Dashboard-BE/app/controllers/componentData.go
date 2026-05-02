@@ -233,7 +233,7 @@ func GetComponentGeoJSONData(c *gin.Context) {
 		query.City = "taipei"
 	}
 
-	_, queryString, err := models.GetComponentChartDataQuery(id, query.City)
+	_, queryString, err := models.GetMapGeoJSONDataQuery(id, query.City)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
 		return

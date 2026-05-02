@@ -205,12 +205,13 @@ export const useMapStore = defineStore("map", {
 						})
 						.addLayer(metroTaipeiVillage);
 				});
-			// Taipei 3D Buildings
-			if (!authStore.isMobileDevice) {
+			// Taipei 3D Buildings (only if VITE_MAPBOXTILE is configured)
+			const mapboxTile = import.meta.env.VITE_MAPBOXTILE;
+			if (!authStore.isMobileDevice && mapboxTile) {
 				this.map
 					.addSource("taipei_building_3d_source", {
 						type: "vector",
-						url: import.meta.env.VITE_MAPBOXTILE,
+						url: mapboxTile,
 					})
 					.addLayer(TaipeiBuilding);
 			}
