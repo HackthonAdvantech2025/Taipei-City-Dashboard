@@ -32,47 +32,47 @@ func InitFoodSafetyHeatmap(c *gin.Context) {
 	INSERT INTO food_safety_complaints (case_type, district, lat, lng, incident_date, description) 
 	VALUES 
 		-- Wanhua Cluster (Ximending area)
-		('環境髒亂', '萬華區', 25.043, 121.508, '2024-04-05', '西門町某小吃店環境不潔'),
-		('環境髒亂', '萬華區', 25.044, 121.507, '2024-04-06', '餐廳廚房有蟑螂'),
-		('過期食品', '萬華區', 25.042, 121.509, '2024-04-08', '超市販售過期鮮奶'),
-		('環境髒亂', '萬華區', 25.0435, 121.5085, '2024-04-10', '巷弄攤販衛生堪慮'),
+		('環境髒亂', '萬華區', 25.043, 121.508, '2026-04-05', '西門町某小吃店環境不潔'),
+		('環境髒亂', '萬華區', 25.044, 121.507, '2026-04-06', '餐廳廚房有蟑螂'),
+		('過期食品', '萬華區', 25.042, 121.509, '2026-04-08', '超市販售過期鮮奶'),
+		('環境髒亂', '萬華區', 25.0435, 121.5085, '2026-04-10', '巷弄攤販衛生堪慮'),
 		
 		-- Da'an Cluster (East District)
-		('疑似中毒', '大安區', 25.041, 121.545, '2024-04-12', '多人在燒肉店用餐後不適'),
-		('疑似中毒', '大安區', 25.0415, 121.5455, '2024-04-12', '同餐廳疑似中毒報案2'),
-		('標示不實', '大安區', 25.033, 121.529, '2024-04-15', '進口水果標示產地不符'),
-		('異物', '大安區', 25.025, 121.530, '2024-04-18', '手搖飲內發現塑膠片'),
+		('疑似中毒', '大安區', 25.041, 121.545, '2026-04-12', '多人在燒肉店用餐後不適'),
+		('疑似中毒', '大安區', 25.0415, 121.5455, '2026-04-12', '同餐廳疑似中毒報案2'),
+		('標示不實', '大安區', 25.033, 121.529, '2026-04-15', '進口水果標示產地不符'),
+		('異物', '大安區', 25.025, 121.530, '2026-04-18', '手搖飲內發現塑膠片'),
 		
 		-- Shilin Cluster (Night Market)
-		('過期食品', '士林區', 25.088, 121.524, '2024-04-20', '士林夜市攤位食材不新鮮'),
-		('環境髒亂', '士林區', 25.089, 121.525, '2024-04-21', '夜市後方水源污染'),
-		('過期食品', '士林區', 25.087, 121.523, '2024-04-22', '零售店販售過期乾貨'),
+		('過期食品', '士林區', 25.088, 121.524, '2026-04-20', '士林夜市攤位食材不新鮮'),
+		('環境髒亂', '士林區', 25.089, 121.525, '2026-04-21', '夜市後方水源污染'),
+		('過期食品', '士林區', 25.087, 121.523, '2026-04-22', '零售店販售過期乾貨'),
 		
 		-- Neihu
-		('異物', '內湖區', 25.082, 121.570, '2024-04-25', '便當內有鐵絲'),
-		('標示不實', '內湖區', 25.068, 121.574, '2024-04-26', '麵包店宣稱無添加卻含有色素'),
+		('異物', '內湖區', 25.082, 121.570, '2026-04-25', '便當內有鐵絲'),
+		('標示不實', '內湖區', 25.068, 121.574, '2026-04-26', '麵包店宣稱無添加卻含有色素'),
 		
 		-- Zhongshan District
-		('環境髒亂', '中山區', 25.056, 121.524, '2024-04-27', '居酒屋後巷老鼠出沒'),
-		('疑似中毒', '中山區', 25.055, 121.525, '2024-04-28', '林森北路餐廳用餐後腹瀉'),
-		('過期食品', '中山區', 25.057, 121.526, '2024-04-29', '超商冷藏食品過期'),
+		('環境髒亂', '中山區', 25.056, 121.524, '2026-04-27', '居酒屋後巷老鼠出沒'),
+		('疑似中毒', '中山區', 25.055, 121.525, '2026-04-28', '林森北路餐廳用餐後腹瀉'),
+		('過期食品', '中山區', 25.057, 121.526, '2026-04-29', '超商冷藏食品過期'),
 		
 		-- Xinyi District
-		('環境髒亂', '信義區', 25.033, 121.564, '2024-05-01', '百貨美食街餐盤未清潔'),
-		('異物', '信義區', 25.034, 121.565, '2024-05-02', '連鎖咖啡店飲料有昆蟲'),
-		('疑似中毒', '信義區', 25.035, 121.566, '2024-05-03', '高檔牛排館顧客集體嘔吐'),
+		('環境髒亂', '信義區', 25.033, 121.564, '2026-05-01', '百貨美食街餐盤未清潔'),
+		('異物', '信義區', 25.034, 121.565, '2026-05-02', '連鎖咖啡店飲料有昆蟲'),
+		('疑似中毒', '信義區', 25.035, 121.566, '2026-05-03', '高檔牛排館顧客集體嘔吐'),
 		
 		-- Zhongzheng District
-		('標示不實', '中正區', 25.031, 121.516, '2024-05-04', '南門市場乾貨產地造假'),
-		('環境髒亂', '中正區', 25.045, 121.514, '2024-05-05', '台北車站周邊小吃攤油煙過大'),
+		('標示不實', '中正區', 25.031, 121.516, '2026-05-04', '南門市場乾貨產地造假'),
+		('環境髒亂', '中正區', 25.045, 121.514, '2026-05-05', '台北車站周邊小吃攤油煙過大'),
 		
 		-- Add more to Wanhua to make it hotter
-		('環境髒亂', '萬華區', 25.045, 121.506, '2024-05-06', '西門町冰店桌面黏膩'),
-		('異物', '萬華區', 25.041, 121.508, '2024-05-07', '滷味攤發現毛髮'),
+		('環境髒亂', '萬華區', 25.045, 121.506, '2026-05-06', '西門町冰店桌面黏膩'),
+		('異物', '萬華區', 25.041, 121.508, '2026-05-07', '滷味攤發現毛髮'),
 		
 		-- Add more to Da'an to make it hotter
-		('環境髒亂', '大安區', 25.040, 121.544, '2024-05-08', '東區茶街公廁旁異味'),
-		('過期食品', '大安區', 25.042, 121.546, '2024-05-09', '麵包店販售隔夜麵包未標示');
+		('環境髒亂', '大安區', 25.040, 121.544, '2026-05-08', '東區茶街公廁旁異味'),
+		('過期食品', '大安區', 25.042, 121.546, '2026-05-09', '麵包店販售隔夜麵包未標示');
 	`
     models.DBDashboard.Exec(insertDataSQL)
 
@@ -137,26 +137,17 @@ func InitFoodSafetyHeatmap(c *gin.Context) {
     models.DBManager.Exec(`INSERT INTO query_charts (index, city, query_type, query_chart, source, short_desc, created_at, updated_at, time_from, time_to) 
               VALUES ('food_safety_complaint_types', 'taipei', 'two_d', ?, '1999 市民熱線', '統計最常被檢舉的食安問題類型。', NOW(), NOW(), 'max', 'now')`, barQuery)
 
-    // 7. Create a dedicated dashboard for heatmap analysis
-    var dashID int
-    dashSQL := `INSERT INTO dashboards (index, name, components, icon, created_at, updated_at) 
-                VALUES ('food_safety_heatmap', '食安檢舉熱點分析', ARRAY[?, ?]::integer[], 'location_on', NOW(), NOW())
-                ON CONFLICT (index) DO UPDATE SET name = EXCLUDED.name, components = EXCLUDED.components, icon = EXCLUDED.icon, updated_at = NOW()
-                RETURNING id`
-    models.DBManager.Raw(dashSQL, heatmapCompID, barCompID).Scan(&dashID)
-
-    // Also append to food_safety dashboard using PostgreSQL array functions
+    // 7. Append to food_safety dashboard using PostgreSQL array functions
     models.DBManager.Exec(`
         UPDATE dashboards SET 
             components = ARRAY(SELECT DISTINCT unnest(components || ARRAY[?, ?]::integer[]))
         WHERE index = 'food_safety'`, heatmapCompID, barCompID)
 
-    // Assign heatmap dashboard to taipei group (group_id=2)
-    models.DBManager.Exec("DELETE FROM dashboard_groups WHERE dashboard_id = ?", dashID)
-    models.DBManager.Exec("INSERT INTO dashboard_groups (dashboard_id, group_id) VALUES (?, 2)", dashID)
+    // Delete the old food_safety_heatmap dashboard if it exists
+    models.DBManager.Exec("DELETE FROM dashboards WHERE index = 'food_safety_heatmap'")
 
 	c.JSON(http.StatusOK, gin.H{
-        "message": "Incident heatmap initialization successful", 
+        "message": "Incident heatmap initialization successful and appended to food_safety", 
         "heatmap_id": heatmapCompID, 
         "bar_id": barCompID,
     })
