@@ -1,0 +1,145 @@
+<h2>跨運具整合地圖｜整體架構</h2>
+<p class="subtitle">方案 B（Hybrid）架構 — 站點資料走 DAG seed，即時到站走 BE Proxy</p>
+
+<div style="display:flex;flex-direction:column;gap:24px;margin-top:8px;">
+
+  <!-- Data Flow Diagram -->
+  <div style="background:#0f172a;border-radius:12px;padding:24px;font-family:monospace;font-size:13px;color:#e2e8f0;line-height:2;">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;align-items:center;text-align:center;">
+
+      <!-- Col 1: Sources -->
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="background:#1e3a5f;border:1px solid #3b82f6;border-radius:8px;padding:10px;">
+          <div style="color:#60a5fa;font-weight:bold;">TDX API</div>
+          <div style="color:#94a3b8;font-size:11px;">交通部運輸資料</div>
+          <div style="color:#64748b;font-size:10px;margin-top:4px;">環狀線 / 機捷</div>
+        </div>
+        <div style="background:#1e3a5f;border:1px solid #3b82f6;border-radius:8px;padding:10px;">
+          <div style="color:#60a5fa;font-weight:bold;">TDX API</div>
+          <div style="color:#94a3b8;font-size:11px;">即時到站時刻</div>
+          <div style="color:#64748b;font-size:10px;margin-top:4px;">Real-time</div>
+        </div>
+        <div style="background:#1a3a1a;border:1px solid #22c55e;border-radius:8px;padding:10px;">
+          <div style="color:#4ade80;font-weight:bold;">PostgreSQL</div>
+          <div style="color:#94a3b8;font-size:11px;">現有資料</div>
+          <div style="color:#64748b;font-size:10px;margin-top:4px;">台北捷運 / YouBike</div>
+        </div>
+      </div>
+
+      <!-- Col 2: DE / Arrow -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div style="background:#2d1b4e;border:2px dashed #a855f7;border-radius:8px;padding:10px;width:100%;box-sizing:border-box;">
+          <div style="color:#c084fc;font-weight:bold;">Airflow DAG</div>
+          <div style="color:#94a3b8;font-size:11px;">一次性 seed</div>
+          <div style="color:#64748b;font-size:10px;margin-top:4px;">feature/transit-de</div>
+        </div>
+        <div style="color:#f59e0b;font-size:22px;">⟶</div>
+        <div style="color:#64748b;font-size:11px;font-style:italic;">直接 proxy<br/>↓</div>
+        <div style="color:#64748b;font-size:11px;"></div>
+      </div>
+
+      <!-- Col 3: BE -->
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="background:#1a2a1a;border:1px solid #22c55e;border-radius:8px;padding:10px;">
+          <div style="color:#4ade80;font-weight:bold;">PostgreSQL</div>
+          <div style="color:#94a3b8;font-size:11px;">站點靜態資料</div>
+          <div style="color:#64748b;font-size:10px;margin-top:4px;">環狀線 / 機捷 stations</div>
+        </div>
+        <div style="background:#1a2a35;border:2px solid #06b6d4;border-radius:8px;padding:10px;">
+          <div style="color:#22d3ee;font-weight:bold;">Go / Gin BE</div>
+          <div style="color:#94a3b8;font-size:11px;">/api/v1/transit/*</div>
+          <div style="color:#64748b;font-size:10px;margin-top:4px;">feature/transit-be</div>
+          <div style="margin-top:6px;font-size:10px;color:#0ea5e9;">
+            GET /stations<br/>
+            GET /arrivals (proxy)
+          </div>
+        </div>
+        <div style="color:#64748b;font-size:11px;text-align:center;">↑ 現有 endpoints<br/>不動</div>
+      </div>
+
+      <!-- Col 4: FE -->
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="background:#2a1a2a;border:2px solid #f472b6;border-radius:8px;padding:10px;">
+          <div style="color:#f9a8d4;font-weight:bold;">Vue FE</div>
+          <div style="color:#94a3b8;font-size:11px;">新 Dashboard 組件</div>
+          <div style="color:#64748b;font-size:10px;margin-top:4px;">feature/transit-fe</div>
+          <div style="margin-top:6px;font-size:10px;color:#ec4899;">
+            🗺 TransitMap.vue<br/>
+            📊 ArrivalBoard.vue
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Legend -->
+    <div style="display:flex;gap:24px;margin-top:20px;padding-top:16px;border-top:1px solid #1e293b;font-size:11px;">
+      <span><span style="color:#a855f7;">▪</span> 紫色虛線 = PoC 做法（Airflow seed）</span>
+      <span><span style="color:#f59e0b;">▪</span> 橘色 = 即時 proxy 路徑</span>
+      <span><span style="color:#22c55e;">▪</span> 綠色 = 持久化資料</span>
+    </div>
+  </div>
+
+  <!-- Git Worktree Plan -->
+  <div style="background:#111827;border-radius:12px;padding:20px;">
+    <h3 style="margin:0 0 16px;color:#f1f5f9;">Git Worktree 分支規劃</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+
+      <div style="background:#1c1338;border-left:3px solid #a855f7;padding:14px;border-radius:6px;">
+        <div style="color:#c084fc;font-weight:bold;font-size:13px;">feature/transit-de</div>
+        <div style="color:#94a3b8;font-size:12px;margin-top:6px;">Airflow DAGs</div>
+        <ul style="color:#64748b;font-size:11px;margin:8px 0 0;padding-left:16px;line-height:1.8;">
+          <li>circular_line_stations_etl.py</li>
+          <li>airport_mrt_stations_etl.py</li>
+          <li>job_config.json × 2</li>
+        </ul>
+        <div style="margin-top:8px;font-size:10px;color:#7c3aed;background:#2d1b4e;padding:6px;border-radius:4px;">
+          可獨立開發，不阻塞 BE/FE
+        </div>
+      </div>
+
+      <div style="background:#0f2030;border-left:3px solid #06b6d4;padding:14px;border-radius:6px;">
+        <div style="color:#22d3ee;font-weight:bold;font-size:13px;">feature/transit-be</div>
+        <div style="color:#94a3b8;font-size:12px;margin-top:6px;">Go API + TDX Proxy</div>
+        <ul style="color:#64748b;font-size:11px;margin:8px 0 0;padding-left:16px;line-height:1.8;">
+          <li>models/transit.go</li>
+          <li>controllers/transit.go</li>
+          <li>services/tdx.go (proxy)</li>
+          <li>routes 新增 transit group</li>
+        </ul>
+        <div style="margin-top:8px;font-size:10px;color:#0891b2;background:#0c2334;padding:6px;border-radius:4px;">
+          依賴 DB stations seed（可 mock）
+        </div>
+      </div>
+
+      <div style="background:#200f28;border-left:3px solid #f472b6;padding:14px;border-radius:6px;">
+        <div style="color:#f9a8d4;font-weight:bold;font-size:13px;">feature/transit-fe</div>
+        <div style="color:#94a3b8;font-size:12px;margin-top:6px;">Vue 組件</div>
+        <ul style="color:#64748b;font-size:11px;margin:8px 0 0;padding-left:16px;line-height:1.8;">
+          <li>TransitMap.vue（地圖主體）</li>
+          <li>ArrivalBoard.vue（到站資訊）</li>
+          <li>store/transit.js</li>
+          <li>dashboard config 新增卡片</li>
+        </ul>
+        <div style="margin-top:8px;font-size:10px;color:#be185d;background:#2a0f1f;padding:6px;border-radius:4px;">
+          可用 mock JSON 先開發，等 BE ready
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Future Migration Note -->
+  <div style="background:#111827;border:1px dashed #374151;border-radius:12px;padding:16px;">
+    <div style="color:#6b7280;font-size:12px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📋 未來遷移至方案 A（記錄備案）</div>
+    <div style="color:#94a3b8;font-size:12px;line-height:1.8;">
+      即時到站改為 DAG 每分鐘抓取 → 存 PostgreSQL history table →
+      BE 改讀 DB 而非直接 proxy TDX。<br/>
+      需額外增加：TDX token refresh DAG、
+      arrivals_history table migration、
+      BE arrivals controller 切換資料源。
+    </div>
+  </div>
+
+</div>

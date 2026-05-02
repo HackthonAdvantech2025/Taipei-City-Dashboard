@@ -1,0 +1,155 @@
+<h2>Section 4：FE 組件設計</h2>
+<p class="subtitle">兩個新 Dashboard Card — TransitMap + ArrivalBoard</p>
+
+<div style="display:flex;flex-direction:column;gap:28px;margin-top:8px;">
+
+  <!-- Dashboard Context -->
+  <div>
+    <div class="label" style="margin-bottom:10px;">現有 Dashboard 配置（示意）</div>
+    <div style="background:#0f172a;border-radius:10px;padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+      <div style="background:#1e293b;border-radius:6px;padding:12px;color:#64748b;font-size:12px;text-align:center;height:80px;display:flex;align-items:center;justify-content:center;">現有卡片<br/>捷運運量</div>
+      <div style="background:#1e293b;border-radius:6px;padding:12px;color:#64748b;font-size:12px;text-align:center;height:80px;display:flex;align-items:center;justify-content:center;">現有卡片<br/>YouBike</div>
+      <div style="background:#1e293b;border-radius:6px;padding:12px;color:#64748b;font-size:12px;text-align:center;height:80px;display:flex;align-items:center;justify-content:center;">現有卡片<br/>交通事故</div>
+      <div style="background:#162032;border:2px solid #22d3ee;border-radius:6px;padding:12px;color:#22d3ee;font-size:12px;text-align:center;height:80px;display:flex;align-items:center;justify-content:center;grid-column:1/3;">🆕 TransitMap.vue<br/><span style="font-size:10px;color:#0891b2;">跨運具整合地圖（2欄寬）</span></div>
+      <div style="background:#1a0f28;border:2px solid #a855f7;border-radius:6px;padding:12px;color:#a855f7;font-size:12px;text-align:center;height:80px;display:flex;align-items:center;justify-content:center;">🆕 ArrivalBoard.vue<br/><span style="font-size:10px;color:#7c3aed;">即時到站</span></div>
+    </div>
+  </div>
+
+  <!-- TransitMap Mockup -->
+  <div>
+    <div class="label" style="margin-bottom:10px;">TransitMap.vue — 組件內部</div>
+    <div style="background:#0f172a;border-radius:10px;overflow:hidden;border:1px solid #1e293b;">
+
+      <!-- Card Header -->
+      <div style="background:#1e293b;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="color:#f1f5f9;font-weight:bold;font-size:14px;">跨運具即時地圖</div>
+        <!-- System Toggle -->
+        <div style="display:flex;gap:8px;font-size:11px;">
+          <span style="background:#dc2626;color:white;padding:3px 10px;border-radius:20px;cursor:pointer;">台北捷運</span>
+          <span style="background:#ca8a04;color:white;padding:3px 10px;border-radius:20px;cursor:pointer;">環狀線</span>
+          <span style="background:#7c3aed;color:white;padding:3px 10px;border-radius:20px;cursor:pointer;">機捷</span>
+          <span style="background:#16a34a;color:white;padding:3px 10px;border-radius:20px;cursor:pointer;">YouBike</span>
+        </div>
+      </div>
+
+      <!-- Map Body (mocked) -->
+      <div style="height:260px;background:linear-gradient(135deg,#0c1a2e 0%,#0f2440 100%);position:relative;overflow:hidden;">
+
+        <!-- Grid lines (map feel) -->
+        <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(30,41,59,0.4) 1px,transparent 1px),linear-gradient(90deg,rgba(30,41,59,0.4) 1px,transparent 1px);background-size:40px 40px;"></div>
+
+        <!-- MRT Lines (mock paths) -->
+        <!-- Red Line -->
+        <svg style="position:absolute;inset:0;width:100%;height:100%;">
+          <line x1="20%" y1="30%" x2="80%" y2="30%" stroke="#ef4444" stroke-width="3" opacity="0.8"/>
+          <line x1="50%" y1="10%" x2="50%" y2="90%" stroke="#2563eb" stroke-width="3" opacity="0.8"/>
+          <!-- 環狀線 (yellow circle) -->
+          <ellipse cx="50%" cy="50%" rx="22%" ry="15%" stroke="#eab308" stroke-width="3" fill="none" opacity="0.9"/>
+          <!-- 機捷 -->
+          <line x1="15%" y1="85%" x2="65%" y2="15%" stroke="#7c3aed" stroke-width="3" opacity="0.8" stroke-dasharray="8,4"/>
+        </svg>
+
+        <!-- Station dots -->
+        <!-- NTMETRO stations (yellow) -->
+        <div style="position:absolute;left:72%;top:44%;width:10px;height:10px;background:#eab308;border-radius:50%;border:2px solid white;cursor:pointer;" title="新北產業園區"></div>
+        <div style="position:absolute;left:63%;top:35%;width:10px;height:10px;background:#eab308;border-radius:50%;border:2px solid white;cursor:pointer;"></div>
+        <div style="position:absolute;left:50%;top:35%;width:10px;height:10px;background:#eab308;border-radius:50%;border:2px solid white;cursor:pointer;"></div>
+        <div style="position:absolute;left:37%;top:43%;width:10px;height:10px;background:#eab308;border-radius:50%;border:2px solid white;cursor:pointer;"></div>
+        <div style="position:absolute;left:37%;top:57%;width:10px;height:10px;background:#eab308;border-radius:50%;border:2px solid white;cursor:pointer;"></div>
+
+        <!-- TYMC stations (purple) -->
+        <div style="position:absolute;left:60%;top:22%;width:10px;height:10px;background:#7c3aed;border-radius:50%;border:2px solid white;cursor:pointer;"></div>
+        <div style="position:absolute;left:45%;top:40%;width:10px;height:10px;background:#7c3aed;border-radius:50%;border:2px solid white;cursor:pointer;"></div>
+        <div style="position:absolute;left:30%;top:60%;width:10px;height:10px;background:#7c3aed;border-radius:50%;border:2px solid white;cursor:pointer;"></div>
+
+        <!-- Selected station popup -->
+        <div style="position:absolute;left:71%;top:30%;background:#1e293b;border:1px solid #22d3ee;border-radius:6px;padding:8px 12px;font-size:11px;white-space:nowrap;">
+          <div style="color:#eab308;font-weight:bold;">🚉 新北產業園區</div>
+          <div style="color:#94a3b8;margin-top:2px;">環狀線 YL01</div>
+          <div style="color:#22d3ee;margin-top:4px;">下班到站：<strong>3 分鐘</strong></div>
+        </div>
+
+      </div>
+
+      <!-- Map Footer -->
+      <div style="background:#1e293b;padding:8px 16px;font-size:11px;color:#64748b;display:flex;gap:20px;">
+        <span>🔴 台北捷運</span>
+        <span>🟡 環狀線</span>
+        <span>🟣 機捷</span>
+        <span>🟢 YouBike</span>
+        <span style="margin-left:auto;color:#475569;">點擊站點查看即時到站</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ArrivalBoard Mockup -->
+  <div>
+    <div class="label" style="margin-bottom:10px;">ArrivalBoard.vue — 組件內部</div>
+    <div style="background:#0f172a;border-radius:10px;overflow:hidden;border:1px solid #1e293b;">
+
+      <!-- Card Header -->
+      <div style="background:#1e293b;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="color:#f1f5f9;font-weight:bold;font-size:14px;">即時到站資訊</div>
+        <div style="display:flex;gap:8px;">
+          <select style="background:#0f172a;border:1px solid #334155;color:#94a3b8;padding:4px 8px;border-radius:4px;font-size:11px;">
+            <option>環狀線</option>
+            <option>機捷</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Arrivals List -->
+      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
+
+        <div style="display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;background:#1e293b;padding:10px 14px;border-radius:6px;border-left:3px solid #eab308;">
+          <div style="width:8px;height:8px;background:#eab308;border-radius:50%;"></div>
+          <div>
+            <div style="color:#f1f5f9;font-size:13px;">新北產業園區</div>
+            <div style="color:#64748b;font-size:11px;">往 迴龍 方向</div>
+          </div>
+          <div style="color:#22d3ee;font-size:20px;font-weight:bold;font-family:monospace;">3<span style="font-size:11px;color:#64748b;">分</span></div>
+          <div style="color:#64748b;font-size:10px;">YL01</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;background:#1e293b;padding:10px 14px;border-radius:6px;border-left:3px solid #eab308;">
+          <div style="width:8px;height:8px;background:#eab308;border-radius:50%;"></div>
+          <div>
+            <div style="color:#f1f5f9;font-size:13px;">幸福</div>
+            <div style="color:#64748b;font-size:11px;">往 新埔民生 方向</div>
+          </div>
+          <div style="color:#22d3ee;font-size:20px;font-weight:bold;font-family:monospace;">7<span style="font-size:11px;color:#64748b;">分</span></div>
+          <div style="color:#64748b;font-size:10px;">YL02</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;background:#1e293b;padding:10px 14px;border-radius:6px;border-left:3px solid #7c3aed;">
+          <div style="width:8px;height:8px;background:#7c3aed;border-radius:50%;"></div>
+          <div>
+            <div style="color:#f1f5f9;font-size:13px;">台北車站</div>
+            <div style="color:#64748b;font-size:11px;">往 桃園機場 方向（直達）</div>
+          </div>
+          <div style="color:#22d3ee;font-size:20px;font-weight:bold;font-family:monospace;">12<span style="font-size:11px;color:#64748b;">分</span></div>
+          <div style="color:#64748b;font-size:10px;">A13</div>
+        </div>
+
+      </div>
+
+      <div style="padding:8px 16px 12px;font-size:10px;color:#475569;">更新於 10:42:30 · 每 30 秒自動刷新</div>
+    </div>
+  </div>
+
+  <!-- Props / Emits spec for Gemini -->
+  <div>
+    <div class="label" style="margin-bottom:10px;">組件介面規格（for Gemini）</div>
+    <div style="background:#0f172a;border-radius:8px;padding:16px;font-family:monospace;font-size:12px;line-height:1.8;color:#94a3b8;">
+      <div style="color:#4ade80;">// TransitMap.vue</div>
+      <div>props: <span style="color:#f9a8d4;">systems</span> <span style="color:#64748b;">String[]</span> <span style="color:#64748b;">// ['ntmetro','tymc','tmrt','youbike']</span></div>
+      <div>emits: <span style="color:#f9a8d4;">station-click</span>(stationId, system)</div>
+      <div style="margin-top:12px;color:#4ade80;">// ArrivalBoard.vue</div>
+      <div>props: <span style="color:#f9a8d4;">system</span> <span style="color:#64748b;">String</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f9a8d4;">stationId</span> <span style="color:#64748b;">String | null</span> <span style="color:#64748b;">// null = 全線</span></div>
+      <div>emits: —</div>
+      <div style="margin-top:12px;color:#4ade80;">// 串接方式：TransitMap 點擊站點 → emit → 父層更新 ArrivalBoard.stationId</div>
+    </div>
+  </div>
+
+</div>

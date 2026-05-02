@@ -1,0 +1,5 @@
+{"type":"server-started","port":65142,"host":"0.0.0.0","url_host":"10.65.30.100","url":"http://10.65.30.100:65142","screen_dir":"/home/nelson/Taipei-City-Dashboard/.superpowers/brainstorm/670665-1777224917/content","state_dir":"/home/nelson/Taipei-City-Dashboard/.superpowers/brainstorm/670665-1777224917/state"}
+{"type":"screen-added","file":"/home/nelson/Taipei-City-Dashboard/.superpowers/brainstorm/670665-1777224917/content/architecture.html"}
+{"type":"screen-added","file":"/home/nelson/Taipei-City-Dashboard/.superpowers/brainstorm/670665-1777224917/content/fe-components.html"}
+{"type":"screen-added","file":"/home/nelson/Taipei-City-Dashboard/.superpowers/brainstorm/670665-1777224917/content/waiting-1.html"}
+{"type":"server-stopped","reason":"idle timeout"}

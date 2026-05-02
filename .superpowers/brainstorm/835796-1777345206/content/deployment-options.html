@@ -1,0 +1,75 @@
+<h2>部署方案對照 (低成本/免費)</h2>
+<p class="subtitle">針對從原專案 fork 出來的架構，建議以下三種方案：</p>
+
+<div class="options">
+  <div class="option" data-choice="azure" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>方案 A：延用 Azure 生態 (預算型)</h3>
+      <p>修改現有 Helm/AKS 設定為 Azure Container Apps (Serverless)。</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <ul>
+            <li>保留原專案大部分配置</li>
+            <li>ACA 有免費額度 (前 18 萬秒)</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <ul>
+            <li>DB (PostgreSQL) 需額外付費</li>
+            <li>設定較複雜</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="paas" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>方案 B：混合 PaaS (最省錢/免費)</h3>
+      <p>FE 部署於 Vercel，BE 與 DB 部署於 Render 或 Railway。</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <ul>
+            <li>FE 完全免費 (Vercel)</li>
+            <li>BE 有免費或極低預算方案</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <ul>
+            <li>跨平台延遲較高</li>
+            <li>需要拆分原有的 Dockerfile</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="vps" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>方案 C：自建 VPS (最穩定/可控)</h3>
+      <p>租用便宜 VPS (如 Hetzner, DigitalOcean)，用 Docker Compose 跑全家桶。</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <ul>
+            <li>效能最穩定，無 Serverless 限制</li>
+            <li>DB 與 Redis 都在同一台，速度快</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <ul>
+            <li>每月固定開銷 (~$5-10 USD)</li>
+            <li>需自行維護伺服器安全</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>我的建議</h3>
+  <p>如果您希望<strong>快速看到成果且不想支付任何費用</strong>，我推薦 <strong>方案 B</strong>。如果您希望<strong>長期穩定開發且預算在每月 300 台幣以內</strong>，我推薦 <strong>方案 C (VPS)</strong>，因為原專案的 Docker 配置稍微改一下就能直接用 Docker Compose 跑起來，不需要去碰複雜的 K8s/Helm。</p>
+</div>
