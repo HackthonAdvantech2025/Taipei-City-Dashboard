@@ -70,20 +70,12 @@ func InitSchoolLunch(c *gin.Context) {
     `)
 
     // 3. Register components
-    var donutCompID, distCompID int64
-    
-    // 3a. Donut Component
-    models.DBManager.Raw("INSERT INTO components (index, name) VALUES ('school_lunch_proportions', '標章食材佔比') ON CONFLICT (index) DO UPDATE SET name = EXCLUDED.name RETURNING id").Scan(&donutCompID)
+    var distCompID int64
     
     // 3b. District Component
     models.DBManager.Raw("INSERT INTO components (index, name) VALUES ('school_lunch_district', '各區食材溯源達成率') ON CONFLICT (index) DO UPDATE SET name = EXCLUDED.name RETURNING id").Scan(&distCompID)
 
     // 4. Register chart configs
-    // Donut Config
-    models.DBManager.Exec(`INSERT INTO component_charts (index, color, types, unit) 
-                 VALUES ('school_lunch_proportions', ARRAY['#66BB6A','#42A5F5','#FFA726','#EF5350'], ARRAY['DonutChart'], '%')
-                 ON CONFLICT (index) DO UPDATE SET color = EXCLUDED.color, types = EXCLUDED.types, unit = EXCLUDED.unit`)
-
     // District Config
     models.DBManager.Exec(`INSERT INTO component_charts (index, color, types, unit) 
                  VALUES ('school_lunch_district', ARRAY['#E8F5E9','#4CAF50','#1B5E20'], ARRAY['DistrictChart', 'ColumnChart'], '%')
@@ -91,18 +83,6 @@ func InitSchoolLunch(c *gin.Context) {
 
     // 5. Register Queries in query_charts
     
-    // Donut Query - DonutChart uses series[0].data format (two_d)
-    donutQuery := `SELECT 
-                        cert_type as x_axis,
-                        round(avg(proportion))::int as data
-                    FROM school_lunch_traceability
-                    GROUP BY cert_type
-                    ORDER BY round(avg(proportion))::int DESC`
-    
-    models.DBManager.Exec("DELETE FROM query_charts WHERE index = 'school_lunch_proportions' AND city = 'taipei'")
-    models.DBManager.Exec(`INSERT INTO query_charts (index, city, query_type, query_chart, source, short_desc, created_at, updated_at, time_from, time_to) 
-              VALUES ('school_lunch_proportions', 'taipei', 'two_d', ?, '臺北市政府教育局', '顯示校園午餐使用各類標章食材的佔比。', NOW(), NOW(), 'max', 'now')`, donutQuery)
-
     // District Query
     distQuery := `SELECT 
                         district as x_axis,
@@ -118,10 +98,10 @@ func InitSchoolLunch(c *gin.Context) {
     // 6. Create Dashboard
     var dashID int
     dashSQL := `INSERT INTO dashboards (index, name, components, icon, created_at, updated_at) 
-                VALUES ('school_lunch', '校園午餐食材溯源', ARRAY[?, ?]::integer[], 'school', NOW(), NOW())
+                VALUES ('school_lunch', '校園午餐食材溯源', ARRAY[?]::integer[], 'school', NOW(), NOW())
                 ON CONFLICT (index) DO UPDATE SET name = EXCLUDED.name, components = EXCLUDED.components, icon = EXCLUDED.icon, updated_at = NOW()
                 RETURNING id`
-    models.DBManager.Raw(dashSQL, donutCompID, distCompID).Scan(&dashID)
+    models.DBManager.Raw(dashSQL, distCompID).Scan(&dashID)
 
     // 7. Assign to taipei group (group_id=2)
     models.DBManager.Exec("DELETE FROM dashboard_groups WHERE dashboard_id = ?", dashID)
@@ -129,7 +109,7 @@ func InitSchoolLunch(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
         "message": "School lunch traceability initialization successful", 
-        "components": []int64{donutCompID, distCompID}, 
+        "components": []int64{distCompID}, 
         "dashboard_id": dashID,
     })
 }

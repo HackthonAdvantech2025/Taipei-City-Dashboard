@@ -175,13 +175,44 @@ func InitFoodSafety(c *gin.Context) {
               VALUES ('food_safety_trend', 'taipei', 'time', ?, '臺北市政府衛生局', '顯示每月食品抽驗合格率走勢，觀察季節性風險。', NOW(), NOW(), 'max', 'now')`
     models.DBManager.Exec(qcSQL, trendQuerySQL)
 
-    // Risk Query (Radar/ThreeD)
-    riskQuerySQL := `SELECT 
-                        category as x_axis,
-                        '風險權重' as y_axis,
-                        round(sum(case when status = 'FAIL' then 1 else 0 end)::numeric / count(*)::numeric * 100, 1)::int as data
-                    FROM food_safety_inspections
-                    GROUP BY 1, 2`
+    // Risk Query (Radar/ThreeD) - Composite Risk Scoring Model
+    riskQuerySQL := `WITH CategorizedData AS (
+                        SELECT 
+                            CASE 
+                                WHEN category LIKE '%水產%' OR category LIKE '%生食%' OR category LIKE '%蟹%' OR category LIKE '%魚%' THEN '生食海鮮 (高風險)'
+                                WHEN category LIKE '%肉%' OR category LIKE '%蛋%' OR category LIKE '%奶油%' THEN '肉類乳製 (高風險)'
+                                WHEN category LIKE '%菜%' OR category LIKE '%果%' OR category LIKE '%植物%' OR category LIKE '%蘑菇%' OR category LIKE '%木耳%' THEN '生鮮蔬果 (中高風險)'
+                                WHEN category LIKE '%飲%' OR category LIKE '%冰%' OR category LIKE '%豆%' THEN '飲冰品豆類 (中風險)'
+                                WHEN category LIKE '%麵%' OR category LIKE '%粉%' OR category LIKE '%乾%' OR category LIKE '%包裝%' OR category LIKE '%蜜餞%' OR category LIKE '%月餅%' THEN '乾貨烘焙 (低風險)'
+                                ELSE '其他加工品'
+                            END as main_category,
+                            status
+                        FROM food_safety_inspections
+                        WHERE category NOT IN ('定期稽查', '最新稽查', 'HACCP稽查')
+                    )
+                    SELECT 
+                        main_category as x_axis,
+                        '風險綜合評分' as y_axis,
+                        round(
+                            (
+                                -- 實際違規率佔 40%
+                                (sum(case when status = 'FAIL' then 1 else 0 end)::numeric / nullif(count(*), 0)::numeric * 40)
+                                + 
+                                -- 基礎嚴重度權重佔 60%
+                                (
+                                    CASE 
+                                        WHEN main_category = '生食海鮮 (高風險)' THEN 95
+                                        WHEN main_category = '肉類乳製 (高風險)' THEN 85
+                                        WHEN main_category = '生鮮蔬果 (中高風險)' THEN 75
+                                        WHEN main_category = '飲冰品豆類 (中風險)' THEN 50
+                                        WHEN main_category = '乾貨烘焙 (低風險)' THEN 25
+                                        ELSE 40
+                                    END * 0.6
+                                )
+                            ), 0
+                        )::int as data
+                    FROM CategorizedData
+                    GROUP BY main_category`
     
     models.DBManager.Exec("DELETE FROM query_charts WHERE index = 'food_safety_risk' AND city = 'taipei'")
     qcSQL = `INSERT INTO query_charts (index, city, query_type, query_chart, source, short_desc, created_at, updated_at, time_from, time_to) 
