@@ -2,6 +2,7 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -344,4 +345,23 @@ func GetMapLegendData(query *string, timeFrom string, timeTo string) (chartData 
 	}
 
 	return chartData, nil
+}
+
+func GetGeoJSONData(query *string) (geoJSON map[string]interface{}, err error) {
+	// Trim trailing semicolon if present
+	trimmedQuery := strings.TrimRight(strings.TrimSpace(*query), ";")
+
+	// Wrap the query to return a single text column named 'result'
+	wrappedQuery := fmt.Sprintf("SELECT (%s)::text AS result", trimmedQuery)
+
+	var row struct {
+		Result string `gorm:"column:result"`
+	}
+	err = DBDashboard.Raw(wrappedQuery).Scan(&row).Error
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal([]byte(row.Result), &geoJSON)
+	return geoJSON, err
 }

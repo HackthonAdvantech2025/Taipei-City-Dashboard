@@ -2,6 +2,7 @@
 package controllers
 
 import (
+	"math"
 	"net/http"
 	"strconv"
 
@@ -48,7 +49,68 @@ func GetComponentChartData(c *gin.Context) {
 		return
 	}
 
-	timeFrom, timeTo, err:= util.GetTime(c)
+	// Handle geojson type early
+	if queryType == "geojson" {
+		chartData, err := models.GetGeoJSONData(&queryString)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
+			return
+		}
+
+		// If this is a chart request for a geojson component, 
+		// we automatically generate a district summary (PASS RATE) to satisfy the user's request.
+		features, ok := chartData["features"].([]interface{})
+		if ok {
+			type districtStats struct {
+				Total int
+				Pass  int
+			}
+			districtMap := make(map[string]*districtStats)
+			
+			for _, f := range features {
+				feat, ok := f.(map[string]interface{})
+				if !ok { continue }
+				props, ok := feat["properties"].(map[string]interface{})
+				if !ok { continue }
+				
+				// Extract district
+				address, _ := props["address"].(string)
+				district := "未知區域"
+				runes := []rune(address)
+				if len(runes) >= 6 {
+					district = string(runes[3:6])
+				}
+				
+				if _, exists := districtMap[district]; !exists {
+					districtMap[district] = &districtStats{}
+				}
+				
+				districtMap[district].Total++
+				status, _ := props["status"].(string)
+				if status == "PASS" {
+					districtMap[district].Pass++
+				}
+			}
+
+			chartDataOutput := []models.TwoDimensionalData{}
+			for dist, stats := range districtMap {
+				passRate := (float64(stats.Pass) / float64(stats.Total)) * 100
+				// Round to 1 decimal place
+				roundedPassRate := math.Round(passRate*10) / 10
+				chartDataOutput = append(chartDataOutput, models.TwoDimensionalData{
+					Xaxis: dist,
+					Data:  roundedPassRate,
+				})
+			}
+			c.JSON(http.StatusOK, gin.H{"status": "success", "data": []interface{}{gin.H{"data": chartDataOutput}}})
+			return
+		}
+
+		c.JSON(http.StatusOK, chartData)
+		return
+	}
+
+	timeFrom, timeTo, err := util.GetTime(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
 		return
@@ -136,9 +198,32 @@ func GetComponentHistoryData(c *gin.Context) {
 
 	// 3. Get and parse the history data
 	chartData, err := models.GetTimeSeriesData(&queryHistory, timeFrom, timeTo)
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": chartData})
+}
+
+func GetComponentGeoJSONData(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid component ID"})
+		return
+	}
+
+	var query componentQuery
+	c.ShouldBindQuery(&query)
+	if query.City == "" {
+		query.City = "taipei"
+	}
+
+	_, queryString, err := models.GetComponentChartDataQuery(id, query.City)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"status": "success", "data": chartData})
+
+	chartData, err := models.GetGeoJSONData(&queryString)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, chartData)
 }

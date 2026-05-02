@@ -54,6 +54,11 @@ func GetDashboardByIndex(c *gin.Context) {
 	_, _, _, _, permissions := util.GetUserInfoFromContext(c)
 	groups := util.GetPermissionAllGroupIDs(permissions)
 
+	// Unauthenticated users get no permissions; default to all public groups (public, taipei, metrotaipei)
+	if len(groups) == 0 {
+		groups = []int{1, 2, 3}
+	}
+
 	dashboardIndex := c.Param("index")
 	city := c.Query("city")
 

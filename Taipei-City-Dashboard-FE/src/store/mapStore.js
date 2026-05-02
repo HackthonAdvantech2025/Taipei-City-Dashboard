@@ -448,6 +448,8 @@ export const useMapStore = defineStore("map", {
 					this.fetchLocalGeoJson(appendLayer);
 				} else if (element.source === "raster") {
 					this.addRasterSource(appendLayer);
+				} else if (element.source === "api") {
+					this.fetchApiGeoJson(appendLayer);
 				}
 			});
 		},
@@ -460,13 +462,31 @@ export const useMapStore = defineStore("map", {
 				})
 				.catch((e) => console.error(e));
 		},
-		// 3-1. Add a local geojson as a source in mapbox
+		// 2.1 Call an API to get the layer data from the backend
+		fetchApiGeoJson(map_config) {
+			http
+				.get(`/component/${map_config.id}/geojson`, {
+					params: { city: map_config.city },
+				})
+				.then((rs) => {
+					this.addGeojsonSource(map_config, rs.data);
+				})
+				.catch((e) => console.error(e));
+		},
 		addGeojsonSource(map_config, data) {
+			const sourceId = `${map_config.layerId}-source`;
+			if (this.map.getLayer(map_config.layerId)) {
+				this.map.removeLayer(map_config.layerId);
+			}
+			if (this.map.getSource(sourceId)) {
+				this.map.removeSource(sourceId);
+			}
+			
 			if (
 				!["voronoi", "isoline"].includes(map_config.type) &&
 				map_config.type !== "symbol-3d"
 			) {
-				this.map.addSource(`${map_config.layerId}-source`, {
+				this.map.addSource(sourceId, {
 					type: "geojson",
 					data: { ...data },
 				});
