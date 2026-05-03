@@ -2,12 +2,8 @@ package controllers
 
 import (
 	"TaipeiCityDashboardBE/app/models"
-	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
-	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,7 +36,7 @@ func InitFoodSafety(c *gin.Context) {
     var mapCompID, trendCompID, riskCompID int64
     
     // 3a. Map Component
-    err = models.DBManager.Raw("INSERT INTO components (index, name) VALUES ('food_safety', '臺北食安稽查地圖') ON CONFLICT (index) DO UPDATE SET name = EXCLUDED.name RETURNING id").Scan(&mapCompID).Error
+    err := models.DBManager.Raw("INSERT INTO components (index, name) VALUES ('food_safety', '臺北食安稽查地圖') ON CONFLICT (index) DO UPDATE SET name = EXCLUDED.name RETURNING id").Scan(&mapCompID).Error
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register map component: " + err.Error()})
         return
