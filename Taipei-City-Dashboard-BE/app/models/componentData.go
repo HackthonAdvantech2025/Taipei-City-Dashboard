@@ -2,6 +2,7 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -123,6 +124,21 @@ func GetComponentChartDataQuery(id int, city string) (queryType string, queryStr
 		Joins("LEFT JOIN query_charts ON components.index = query_charts.index").
 		Where("components.id = ?", id).
 		Where("query_charts.city = ?", city).
+		Find(&chartDataQuery).Error
+	if err != nil {
+		return queryType, queryString, err
+	}
+	return chartDataQuery.QueryType, chartDataQuery.QueryChart, nil
+}
+
+func GetMapGeoJSONDataQuery(mapID int, city string) (queryType string, queryString string, err error) {
+	var chartDataQuery ChartDataQuery
+
+	err = DBManager.
+		Table("query_charts").
+		Select("query_type, query_chart").
+		Where("map_config_ids @> ARRAY[?]::integer[]", mapID).
+		Where("city = ?", city).
 		Find(&chartDataQuery).Error
 	if err != nil {
 		return queryType, queryString, err
@@ -344,4 +360,30 @@ func GetMapLegendData(query *string, timeFrom string, timeTo string) (chartData 
 	}
 
 	return chartData, nil
+}
+
+func GetGeoJSONData(query *string) (geoJSON map[string]interface{}, err error) {
+	if query == nil || strings.TrimSpace(*query) == "" {
+		return nil, fmt.Errorf("query is empty")
+	}
+	// Trim trailing semicolon if present
+	trimmedQuery := strings.TrimRight(strings.TrimSpace(*query), ";")
+
+	// Use a more flexible wrapping that supports WITH clauses and complex SELECTs
+	// We wrap it as a subquery in the FROM clause instead of a scalar subquery
+	wrappedQuery := fmt.Sprintf("SELECT result::text FROM (%s) AS sub(result) LIMIT 1", trimmedQuery)
+
+	var result string
+	err = DBDashboard.Raw(wrappedQuery).Scan(&result).Error
+	if err != nil {
+		// Fallback for queries that might not have exactly one column named 'result'
+		// or if the subquery wrapping fails for some specific PG versions
+		err = DBDashboard.Raw(trimmedQuery).Scan(&result).Error
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = json.Unmarshal([]byte(result), &geoJSON)
+	return geoJSON, err
 }

@@ -27,9 +27,14 @@ var (
 
 // ConfigureRoutes configures all routes for the API and sets version router groups.
 func ConfigureRoutes() {
-	Router.Use(middleware.ValidateJWT)
 	// API routers
 	RouterGroup = Router.Group("/api/" + global.VERSION)
+	RouterGroup.GET("/init-food-safety", controllers.InitFoodSafety)
+	RouterGroup.GET("/init-school-lunch", controllers.InitSchoolLunch)
+	RouterGroup.GET("/init-food-safety-heatmap", controllers.InitFoodSafetyHeatmap)
+	RouterGroup.GET("/init-food-safety-dual-city", controllers.InitFoodSafetyDualCity)
+
+	Router.Use(middleware.ValidateJWT)
 	configureAuthRoutes()
 	configureUserRoutes()
 	configureLMRoutes()
@@ -113,6 +118,7 @@ func configureComponentRoutes() {
 		componentRoutes.GET("/:id", controllers.GetComponentByID)
 		componentRoutes.GET("/:id/all", controllers.GetComponentByIDAll)
 		componentRoutes.GET("/:id/chart", controllers.GetComponentChartData)
+		componentRoutes.GET("/:id/geojson", controllers.GetComponentGeoJSONData)
 		componentRoutes.GET("/:id/history", controllers.GetComponentHistoryData)
 	}
 	componentRoutes.Use(middleware.IsSysAdm())

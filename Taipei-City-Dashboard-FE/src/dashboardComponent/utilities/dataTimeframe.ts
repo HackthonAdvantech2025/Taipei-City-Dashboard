@@ -10,6 +10,8 @@ export function getComponentDataTimeframe(
 	let parsedTimeFrom = "";
 	let parsedTimeTo = "";
 
+	let isAbsoluteTimeFrom = false;
+
 	if (time_from === "max") {
 		nowTimeFrom.setFullYear(nowTimeFrom.getFullYear() - 30);
 	} else if (time_from.split("_")[1] === "start") {
@@ -66,19 +68,26 @@ export function getComponentDataTimeframe(
 			default:
 				break;
 		}
+	} else if (time_from && time_from.includes("-")) {
+		parsedTimeFrom = time_from.includes(" ") ? time_from : time_from + " 00:00:00";
+		isAbsoluteTimeFrom = true;
 	}
 
-	parsedTimeFrom = new Date(Number(nowTimeFrom) - Number(tzoffset))
-		.toISOString()
-		.split(".")[0]
-		.replace("T", " ");
+	if (!isAbsoluteTimeFrom) {
+		parsedTimeFrom = new Date(Number(nowTimeFrom) - Number(tzoffset))
+			.toISOString()
+			.split(".")[0]
+			.replace("T", " ");
+	}
 
-	if (time_to === "now") {
+	if (time_to === "now" || !time_to) {
 		// let parsedTimeTo be the current time formated YYYY-MM-DD HH:MM:SS and in UTC+8
 		parsedTimeTo = new Date(Number(nowTimeTo) - Number(tzoffset))
 			.toISOString()
 			.split(".")[0]
 			.replace("T", " ");
+	} else if (time_to && time_to.includes("-")) {
+		parsedTimeTo = time_to.includes(" ") ? time_to : time_to + " 23:59:59";
 	}
 	if (api === true) {
 		return {

@@ -74,7 +74,11 @@ watch(
 );
 
 onMounted(() => {
-	mapStore.initializeMapBox();
+	try {
+		mapStore.initializeMapBox();
+	} catch (e) {
+		console.warn("[MapContainer] WebGL 初始化失敗，地圖功能將停用。請確認瀏覽器已開啟硬體加速。", e.message);
+	}
 	mapStore.setCurrentLocation();
 	route.query.city 
 		? mapStore.updateMapViewForCity(route.query.city)
